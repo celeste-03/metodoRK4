@@ -308,37 +308,105 @@
 
 
 <h1 id="ejemplo-de-uso-del-metodo-rk4">Ejemplo de uso del Método RK4</h1>
-<p>A continuación, se muestra un ejemplo de uso del método RK4 aplicado a la ecuación <span class="arithmatex">\( \frac{dy}{dt} = -i[O, y(t)] \)</span>:</p>
-<pre><code class="language-python">import numpy as np
+<p>A continuación, se muestra un ejemplo de uso del método RK4 aplicado a la dinámica del sistema. Utilizamos los datos de <code>stateQuant00</code> y <code>stateQuant11</code> en función del tiempo.</p>
+<pre><code class="language-python">
+import numpy as np
 import matplotlib.pyplot as plt
 
-def rk4(f, y0, t0, h, n):
-    t = t0
-    y = y0
-    for i in range(n):
-        k1 = h * f(t, y)
-        k2 = h * f(t + h/2, y + k1/2)
-        k3 = h * f(t + h/2, y + k2/2)
-        k4 = h * f(t + h, y + k3)
-        y += (k1 + 2*k2 + 2*k3 + k4) / 6
-        t += h
-    return y
+# Definición de la matriz identidad
+identityMatrix = np.array([[1, 0], [0, 1]])
+print(identityMatrix)
 
-# Definir la matriz O y el estado inicial
-O = np.array([[0, 1], [-1, 0]])
-y0 = np.array([1, 0], dtype=complex)
+# Operaciones con matrices
+identityMatrix.shape
+identityMatrix + identityMatrix
 
-# Calcular la solución utilizando rk4
-y = rk4(lambda t, y: -1j * O @ y, y0, 0, 0.01, 100)
+# Matriz de ejemplo
+aEx = np.array([[0, 1], [1, 0]])
+np.dot(aEx, aEx)  # Producto matricial A*B
 
-# Guardar la gráfica como imagen
-plt.plot(np.real(y), np.imag(y))
-plt.xlabel('Re(y)')
-plt.ylabel('Im(y)')
-plt.title('Método RK4 - Solución numérica')
-plt.savefig('grafica_metodo_rk4.png')  # Guardar la gráfica
-plt.close()  # Cerrar la figura
+# Constante imaginaria
+iConst = 1.0j
+print(iConst)
+
+# Operador
+oOper = np.array([[0, 1], [1, 0]])
+print(oOper)
+
+# Estado inicial
+yInit = np.array([[1, 0], [0, 0]])
+print(yInit)
+
+# Definición de la función de dinámica
+def dyn_generator(oper, state):
+    return -1 * 1.0j * (np.dot(oper, state) - np.dot(state, oper))
+
+# Evaluar la función de dinámica
+print(dyn_generator(oOper, yInit))
+
+# Definición de la función RK4
+def rk4(func, oper, state, h):
+    k_1 = h * func(oper, state)
+    k_2 = h * func(oper, state + k_1 / 2)
+    k_3 = h * func(oper, state + k_2 / 2)
+    k_4 = h * func(oper, state + k_3)
+    return state + 1 / 6 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+
+# Evaluar la función RK4
+print(rk4(dyn_generator, oOper, yInit, 0.5))
+
+# Crear el arreglo de tiempos
+times = np.linspace(0, 10, num=100)
+
+# Paso temporal
+h = times[1]
+
+# Copia profunda del estado inicial
+yCopy = yInit.copy()
+
+# Inicializar arreglos para almacenar resultados
+stateQuant00 = np.zeros(times.size)
+stateQuant11 = np.zeros(times.size)
+
+# Bucle para actualizar el estado
+for tt in range(times.size):
+    stateQuant00[tt] = yInit[0, 0].real
+    stateQuant11[tt] = yInit[1, 1].real
+
+    # Invocar la función RK4
+    yN = rk4(dyn_generator, oOper, yInit, h)
+    yInit = yN
+
+# Graficar los resultados
+plt.style.use('_mpl-gallery')
+
+# Definir los datos para la gráfica
+y = stateQuant00
+x = times
+y2 = stateQuant11
+x2 = times
+
+# Crear la gráfica
+fig, ax = plt.subplots()
+
+# Graficar los datos con colores diferentes
+ax.plot(x2, y2, 'x', markeredgewidth=2, label='StateQuant11', color='blue')  # Gráfica de stateQuant11 en azul
+ax.plot(x, y, linewidth=4.0, label='StateQuant00', color='orange')  # Gráfica de stateQuant00 en naranja
+
+# Añadir etiquetas a los ejes y título
+plt.xlabel('Tiempo (s)')
+plt.ylabel('Estado')
+plt.title('Método Runge-Kutta de orden 4 (RK4)')
+plt.legend()
+
+# Guardar la gráfica en la carpeta docs
+plt.savefig('/home/celeste_us/metodoRK4/docs/grafica_rk4.png')  # Guardar la gráfica
+
+# Mostrar el gráfico en Jupyter Notebook
+plt.show()
+
 </code></pre>
+<p><img alt="Descripción de la imagen" src="../grafica_rk4.png" /></p>
 
 
 
