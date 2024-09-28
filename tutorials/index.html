@@ -326,60 +326,20 @@ def rk4(f, y0, t0, h, n):
         t += h
     return y
 
-# Graficar los resultados
+# Definir la matriz O y el estado inicial
 O = np.array([[0, 1], [-1, 0]])
 y0 = np.array([1, 0], dtype=complex)
+
+# Calcular la solución utilizando rk4
 y = rk4(lambda t, y: -1j * O @ y, y0, 0, 0.01, 100)
 
+# Guardar la gráfica como imagen
 plt.plot(np.real(y), np.imag(y))
 plt.xlabel('Re(y)')
 plt.ylabel('Im(y)')
 plt.title('Método RK4 - Solución numérica')
-plt.show()
-</code></pre>
-<p>import numpy as np</p>
-<p>def dyn_generator(t, y):
-    """
-    Genera la dinámica para el sistema dado.</p>
-<pre><code>Args:
-    t (float): Tiempo actual.
-    y (ndarray): Estado actual del sistema.
-
-Returns:
-    ndarray: Derivada del estado.
-
-Ejemplo de uso:
-    dy_dt = dyn_generator(0, np.array([1, 0]))
-"""
-O = np.array([[0, 1], [-1, 0]])  # Define la matriz O aquí
-return -1j * (O @ y)
-</code></pre>
-<p>def rk4(f, y0, t0, h, n):
-    """
-    Resuelve una ecuación diferencial usando el método de Runge-Kutta de cuarto orden (RK4).</p>
-<pre><code>Args:
-    f (function): Función que describe la dinámica del sistema.
-    y0 (ndarray): Estado inicial.
-    t0 (float): Tiempo inicial.
-    h (float): Tamaño del paso.
-    n (int): Número de pasos.
-
-Returns:
-    ndarray: Solución aproximada después de n pasos.
-
-Ejemplo de uso:
-    result = rk4(lambda t, y: -1j * O @ y, np.array([1, 0]), 0, 0.01, 100)
-"""
-t = t0
-y = y0
-for i in range(n):
-    k1 = h * f(t, y)
-    k2 = h * f(t + h/2, y + k1/2)
-    k3 = h * f(t + h/2, y + k2/2)
-    k4 = h * f(t + h, y + k3)
-    y += (k1 + 2*k2 + 2*k3 + k4) / 6
-    t += h
-return y
+plt.savefig('grafica_metodo_rk4.png')  # Guardar la gráfica
+plt.close()  # Cerrar la figura
 </code></pre>
 
 
