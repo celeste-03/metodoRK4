@@ -309,104 +309,99 @@
 
 <h1 id="ejemplo-de-uso-del-metodo-rk4">Ejemplo de uso del Método RK4</h1>
 <p>A continuación, se muestra un ejemplo de uso del método RK4 aplicado a la dinámica del sistema. Utilizamos los datos de <code>stateQuant00</code> y <code>stateQuant11</code> en función del tiempo.</p>
-<pre><code class="language-python">
-import numpy as np
+<pre><code class="language-python">import numpy as np
 import matplotlib.pyplot as plt
 
-# Definición de la matriz identidad
+# Definir la matriz identidad
 identityMatrix = np.array([[1, 0], [0, 1]])
-print(identityMatrix)
 
-# Operaciones con matrices
-identityMatrix.shape
-identityMatrix + identityMatrix
-
-# Matriz de ejemplo
-aEx = np.array([[0, 1], [1, 0]])
-np.dot(aEx, aEx)  # Producto matricial A*B
-
-# Constante imaginaria
-iConst = 1.0j
-print(iConst)
-
-# Operador
+# Operador O
 oOper = np.array([[0, 1], [1, 0]])
-print(oOper)
 
 # Estado inicial
-yInit = np.array([[1, 0], [0, 0]])
-print(yInit)
+yInit = np.array([[1, 0], [0, 0]], dtype=complex)
 
-# Definición de la función de dinámica
+# Función generadora de dinámica
 def dyn_generator(oper, state):
-    return -1 * 1.0j * (np.dot(oper, state) - np.dot(state, oper))
+    return -1*1.0j*(np.dot(oper, state) - np.dot(state, oper))
 
-# Evaluar la función de dinámica
-print(dyn_generator(oOper, yInit))
-
-# Definición de la función RK4
+# Implementación de Runge-Kutta de cuarto orden
 def rk4(func, oper, state, h):
     k_1 = h * func(oper, state)
     k_2 = h * func(oper, state + k_1 / 2)
     k_3 = h * func(oper, state + k_2 / 2)
     k_4 = h * func(oper, state + k_3)
-    return state + 1 / 6 * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
+    return state + (1/6) * (k_1 + 2 * k_2 + 2 * k_3 + k_4)
 
-# Evaluar la función RK4
-print(rk4(dyn_generator, oOper, yInit, 0.5))
-
-# Crear el arreglo de tiempos
+# Crear el arreglo de tiempos desde 0 hasta 10
 times = np.linspace(0, 10, num=100)
 
-# Paso temporal
-h = times[1]
+# Definir el paso temporal h como la diferencia entre dos tiempos consecutivos
+h = times[1] - times[0]
 
-# Copia profunda del estado inicial
+# Hacer una copia profunda del estado inicial
 yCopy = yInit.copy()
 
-# Inicializar arreglos para almacenar resultados
+# Definir los arreglos para almacenar las cantidades de estado
 stateQuant00 = np.zeros(times.size)
 stateQuant11 = np.zeros(times.size)
 
-# Bucle para actualizar el estado
+# Ciclo para calcular los valores en cada paso temporal
 for tt in range(times.size):
+    # Guardar las entradas (0,0) y (1,1) de yInit en los arreglos correspondientes
     stateQuant00[tt] = yInit[0, 0].real
     stateQuant11[tt] = yInit[1, 1].real
 
-    # Invocar la función RK4
+    # Invoque rk4 operando sobre yInit y asignar el resultado a yN
     yN = rk4(dyn_generator, oOper, yInit, h)
+
+    # Asignar yN a yInit para la siguiente iteración
     yInit = yN
 
+# Ruta para guardar las imágenes
+
 # Graficar los resultados
-plt.style.use('_mpl-gallery')
-
-# Definir los datos para la gráfica
-y = stateQuant00
-x = times
-y2 = stateQuant11
-x2 = times
-
-# Crear la gráfica
-fig, ax = plt.subplots()
-
-# Graficar los datos con colores diferentes
-ax.plot(x2, y2, 'x', markeredgewidth=2, label='StateQuant11', color='blue')  # Gráfica de stateQuant11 en azul
-ax.plot(x, y, linewidth=4.0, label='StateQuant00', color='orange')  # Gráfica de stateQuant00 en naranja
-
-# Añadir etiquetas a los ejes y título
-plt.xlabel('Tiempo (s)')
+plt.figure(figsize=(10, 6))
+plt.plot(times, stateQuant00, label='Estado (0,0)', linewidth=2.0, color='blue')
+plt.plot(times, stateQuant11, 'x', label='Estado (1,1)', markeredgewidth=2, color='green')
+plt.xlabel('Tiempo')
 plt.ylabel('Estado')
-plt.title('Método Runge-Kutta de orden 4 (RK4)')
+plt.title('Evolución del estado con Runge-Kutta 4')
 plt.legend()
+plt.grid(True)
 
-# Guardar la gráfica en la carpeta docs
-plt.savefig('/home/celeste_us/metodoRK4/docs/grafica_rk4.png')  # Guardar la gráfica
-
-# Mostrar el gráfico en Jupyter Notebook
+# Guardar la imagen
+plt.savefig(/home/celeste_us/metodoRK4/docs/evolucion_estado_rk4.png)
 plt.show()
 
+# Probar con diferentes valores de h para analizar estabilidad
+colors = ['green', 'orange', 'magenta', 'blue']  # Colores diferentes para cada h
+h_values = [0.05, 0.1, 0.5, 1.0]
+
+for i, new_h in enumerate(h_values):
+    yInit = yCopy.copy()
+    stateQuant00 = np.zeros(times.size)
+    stateQuant11 = np.zeros(times.size)
+
+    for tt in range(times.size):
+        stateQuant00[tt] = yInit[0, 0].real
+        stateQuant11[tt] = yInit[1, 1].real
+        yN = rk4(dyn_generator, oOper, yInit, new_h)
+        yInit = yN
+
+    plt.plot(times, stateQuant00, label=f'h={new_h}', color=colors[i])
+plt.xlabel('Tiempo')
+plt.ylabel('Estado')
+plt.title('Evolución del estado con diferentes valores de h')
+plt.legend()
+plt.grid(True)
+
+# Guardar la imagen
+plt.savefig(/home/celeste_us/metodoRK4/docs/evolucion_estado_diferentes_h.png)
+plt.show()
 </code></pre>
-<p><img alt="Descripción de la imagen" src="../grafica_rk4.png" /></p>
+<p><img alt="Descripción de la imagen" src="../evolucion_estado_rk4.png" />
+<img alt="Descripción de la imagen" src="../evolucion_estado_diferentes_h.png" /></p>
 
 
 
